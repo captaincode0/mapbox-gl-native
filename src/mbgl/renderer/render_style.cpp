@@ -84,6 +84,10 @@ const RenderLight& RenderStyle::getRenderLight() const {
 void RenderStyle::update(const UpdateParameters& parameters) {
     assert(BackendScope::exists()); // Required for custom layers.
 
+    if (parameters.mode == MapMode::Still) {
+        zoomHistory.first = true;
+    }
+
     const bool zoomChanged = zoomHistory.update(parameters.transformState.getZoom(), parameters.timePoint);
 
     const TransitionParameters transitionParameters {
