@@ -52,10 +52,6 @@ GeometryTile::~GeometryTile() {
     markObsolete();
 }
 
-void GeometryTile::cancel() {
-    markObsolete();
-}
-
 void GeometryTile::markObsolete() {
     obsolete = true;
 }

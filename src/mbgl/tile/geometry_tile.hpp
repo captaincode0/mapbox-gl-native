@@ -63,8 +63,6 @@ public:
         std::vector<Feature>& result,
         const SourceQueryOptions&) override;
 
-    void cancel() override;
-
     class LayoutResult {
     public:
         std::unordered_map<std::string, std::shared_ptr<Bucket>> nonSymbolBuckets;
