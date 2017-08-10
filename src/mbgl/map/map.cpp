@@ -720,6 +720,9 @@ void Map::Impl::onUpdate(Update flags) {
 }
 
 void Map::Impl::onStyleLoading() {
+    if (mode == MapMode::Still) {
+        cameraMutated = false;
+    }
     loading = true;
     rendererFullyLoaded = false;
     observer.onWillStartLoadingMap();

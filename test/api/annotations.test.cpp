@@ -94,8 +94,8 @@ TEST(Annotations, AntimeridianAnnotationSmall) {
     AnnotationTest test;
 
     double antimeridian = 180;
-    test.map.setLatLngZoom(mbgl::LatLng(0, antimeridian), 0);
     test.map.getStyle().loadJSON(util::read_file("test/fixtures/api/empty.json"));
+    test.map.setLatLngZoom(mbgl::LatLng(0, antimeridian), 0);
 
     LineString<double> line = {{ { antimeridian, 20 }, { antimeridian, -20 } }};
     LineAnnotation lineAnnotation { line };
@@ -115,8 +115,8 @@ TEST(Annotations, AntimeridianAnnotationLarge) {
     AnnotationTest test;
 
     double antimeridian = 180;
-    test.map.setLatLngZoom(mbgl::LatLng(0, antimeridian), 0);
     test.map.getStyle().loadJSON(util::read_file("test/fixtures/api/empty.json"));
+    test.map.setLatLngZoom(mbgl::LatLng(0, antimeridian), 0);
 
     LineString<double> line = {{ { antimeridian, 20 }, { antimeridian, -20 } }};
     LineAnnotation lineAnnotation { line };

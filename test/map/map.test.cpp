@@ -443,8 +443,6 @@ TEST(Map, DisabledSources) {
         return {};
     };
 
-    test.map.setZoom(1);
-
     // This stylesheet has two raster layers, one that starts at zoom 1, the other at zoom 0.
     // We first render a map at zoom level 1, which should show both layers (both are "visible" due
     // to an opacity of 0.5). Then, we are zooming back out to a zoom level of 0.5 and rerender.
@@ -484,6 +482,7 @@ TEST(Map, DisabledSources) {
 }
 )STYLE");
 
+    test.map.setZoom(1.0);
     test::checkImage("test/fixtures/map/disabled_layers/first", test.frontend.render(test.map));
     test.map.setZoom(0.5);
     test::checkImage("test/fixtures/map/disabled_layers/second", test.frontend.render(test.map));
