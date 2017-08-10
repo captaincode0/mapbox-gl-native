@@ -4,7 +4,7 @@ namespace mbgl {
 namespace style {
 namespace expression {
 
-template<> Result<std::string> TypedMatch<std::string>::evaluateInput(const EvaluationParameters& params) const {
+template<> Result<std::string> Match<std::string>::evaluateInput(const EvaluationParameters& params) const {
     const auto& inputValue = input->evaluate<std::string>(params);
     if (!inputValue) {
         return inputValue.error();
@@ -12,7 +12,7 @@ template<> Result<std::string> TypedMatch<std::string>::evaluateInput(const Eval
     return *inputValue;
 }
 
-template<> Result<int64_t> TypedMatch<int64_t>::evaluateInput(const EvaluationParameters& params) const {
+template<> Result<int64_t> Match<int64_t>::evaluateInput(const EvaluationParameters& params) const {
     const auto& inputValue = input->evaluate<float>(params);
     if (!inputValue) {
         return inputValue.error();
