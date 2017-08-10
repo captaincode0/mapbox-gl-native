@@ -44,19 +44,9 @@ public:
         return true;
     }
     
-    EvaluationResult evaluate(const EvaluationParameters& params) const override {
-        const auto& inputValue = evaluateInput(params);
-        if (!inputValue) {
-            return inputValue.error();
-        }
-        if (cases.find(*inputValue) == cases.end()) {
-            return otherwise->evaluate(params);
-        }
-        return cases.at(*inputValue)->evaluate(params);
-    }
+    EvaluationResult evaluate(const EvaluationParameters& params) const override;
     
 private:
-    Result<T> evaluateInput(const EvaluationParameters& params) const;
     
     std::unique_ptr<Expression> input;
     Cases cases;
@@ -143,45 +133,10 @@ struct ParseMatch {
         
         return inputType->match(
             [&](const type::NumberType&) {
-                Match<int64_t>::Cases typedCases;
-                for (std::pair<std::vector<InputType>,
-                               std::unique_ptr<Expression>>& pair : cases) {
-                    std::shared_ptr<Expression> result = std::move(pair.second);
-                    for (const InputType& label : pair.first) {
-                        typedCases.emplace(
-                            label.template get<int64_t>(),
-                            result
-                        );
-
-                    }
-                }
-                return ParseResult(std::make_unique<Match<int64_t>>(
-                    *outputType,
-                    std::move(*input),
-                    std::move(typedCases),
-                    std::move(*otherwise)
-                ));
+                return create<int64_t>(*outputType, std::move(*input), std::move(cases), std::move(*otherwise), ctx);
             },
             [&](const type::StringType&) {
-                Match<std::string>::Cases typedCases;
-                for (std::pair<std::vector<InputType>,
-                               std::unique_ptr<Expression>>& pair : cases) {
-                    std::shared_ptr<Expression> result = std::move(pair.second);
-                    for (const InputType& label : pair.first) {
-                        typedCases.emplace(
-                            label.template get<std::string>(),
-                            result
-                        );
-
-                    }
-                }
-
-                return ParseResult(std::make_unique<Match<std::string>>(
-                    *outputType,
-                    std::move(*input),
-                    std::move(typedCases),
-                    std::move(*otherwise)
-                ));
+                return create<std::string>(*outputType, std::move(*input), std::move(cases), std::move(*otherwise), ctx);
             },
             [&](const auto&) {
                 assert(false);
@@ -216,6 +171,38 @@ private:
         }
         
         return result;
+    }
+    
+    template <typename T>
+    static ParseResult create(type::Type outputType,
+                              std::unique_ptr<Expression>input,
+                              std::vector<std::pair<std::vector<InputType>,
+                                                    std::unique_ptr<Expression>>> cases,
+                              std::unique_ptr<Expression> otherwise,
+                              ParsingContext ctx) {
+        typename Match<T>::Cases typedCases;
+        
+        std::size_t index = 2;
+        for (std::pair<std::vector<InputType>,
+                       std::unique_ptr<Expression>>& pair : cases) {
+            std::shared_ptr<Expression> result = std::move(pair.second);
+            for (const InputType& label : pair.first) {
+                const T& typedLabel = label.template get<T>();
+                if (typedCases.find(typedLabel) != typedCases.end()) {
+                    ctx.error("Branch labels must be unique.", index);
+                    return ParseResult();
+                }
+                typedCases.emplace(typedLabel, result);
+            }
+            
+            index += 2;
+        }
+        return ParseResult(std::make_unique<Match<T>>(
+            outputType,
+            std::move(input),
+            std::move(typedCases),
+            std::move(otherwise)
+        ));
     }
 
     static bool isIntegerValue(const mbgl::Value& v) {
