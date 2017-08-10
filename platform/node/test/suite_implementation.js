@@ -50,7 +50,23 @@ module.exports = function (style, options, callback) {
     options.bearing = style.bearing || 0;
     options.pitch = style.pitch || 0;
 
-    map.load(style);
+    map.load("{}");
+    map.render(options, function (err, pixels) {
+        map.load(style);
+        applyOperations(options.operations, function() {
+            map.render(options, function (err, pixels) {
+                var results = options.queryGeometry ?
+                  map.queryRenderedFeatures(options.queryGeometry, options.queryOptions || {}) :
+                  [];
+                if (!options.recycleMap) {
+                    map.release();
+                }
+                if (timedOut) return;
+                clearTimeout(watchdog);
+                callback(err, pixels, results.map(prepareFeatures));
+            });
+        });
+    });
 
     function mapRequest(req, callback) {
         request(req.url, {encoding: null}, function (err, response, body) {
@@ -65,20 +81,6 @@ module.exports = function (style, options, callback) {
             }
         });
     };
-
-    applyOperations(options.operations, function() {
-        map.render(options, function (err, pixels) {
-            var results = options.queryGeometry ?
-              map.queryRenderedFeatures(options.queryGeometry, options.queryOptions || {}) :
-              [];
-            if (!options.recycleMap) {
-                map.release();
-            }
-            if (timedOut) return;
-            clearTimeout(watchdog);
-            callback(err, pixels, results.map(prepareFeatures));
-        });
-    });
 
     function applyOperations(operations, callback) {
         var operation = operations && operations[0];
